@@ -26,38 +26,19 @@ pip install torch==2.1.0 torchvision==0.16.0 torchaudio==2.1.0 --index-url https
 # CPU版本
 pip install torch==2.1.0+cpu torchvision==0.16.0+cpu --index-url https://download.pytorch.org/whl/cpu
 
-### 3. 下载模型文件
-由于模型文件较大，需要单独下载：
-
-```bash
-# 创建模型目录
-mkdir -p models
-
-# 下载 GroundingDINO 模型 (约1.2GB)
-wget https://github.com/IDEA-Research/GroundingDINO/releases/download/v0.1.0-alpha/groundingdino_swint_ogc.pth -O models/groundingdino_swint_ogc.pth
-
-# 下载 SAM 模型 (约2.4GB)
-wget https://dl.fbaipublicfiles.com/segment_anything/sam_vit_h_4b8939.pth -O models/sam_vit_h_4b8939.pth
-
-# 下载天空移除模型 (约50MB)
-# 注意：这个模型需要从原始项目获取，或使用其他天空移除模型
-```
-
-**或者手动下载：**
-- [GroundingDINO 模型](https://github.com/IDEA-Research/GroundingDINO/releases/download/v0.1.0-alpha/groundingdino_swint_ogc.pth)
-- [SAM 模型](https://dl.fbaipublicfiles.com/segment_anything/sam_vit_h_4b8939.pth)
-- 天空移除模型需要从相关项目获取
-
-### 4. 安装GroundingDINO
+### 3. 安装GroundingDINO
 cd SkyWalkerMask
 cd GroundingDINO
 pip install -e .
 cd ..
 
-### 5. 安装其他依赖
+### 4. 安装其他依赖
 pip install -r requirements.txt
 
-## 使用方法
+### 5. 下载模型文件
+mkdir models
+
+### 模型下载
 #### Windows (命令提示符)
 ```cmd
 curl -L -o models/groundingdino_swint_ogc.pth https://github.com/IDEA-Research/GroundingDINO/releases/download/v0.1.0-alpha/groundingdino_swint_ogc.pth
@@ -105,11 +86,12 @@ SkyWalkerMask/
 │   └── ...
 ├── outputs/        # 输出掩码目录 (自动创建)
 ├── human_mask.py   # 人物掩码生成脚本
-└── skyremoval.py   # 天空移除脚本
+└── sky_mask.py     # 天空掩码生成脚本
 
 ### 2. 运行脚本
 conda activate skywalker
 python human_mask.py
+python sky_mask.py
 python skyremoval.py
 
 ### 3. 查看结果
@@ -121,7 +103,7 @@ SkyWalkerMask/
 ├── README.md              # 说明文档
 ├── requirements.txt       # 依赖列表
 ├── human_mask.py         # 人物掩码生成脚本
-├── skyremoval.py         # 天空移除脚本
+├── sky_mask.py           # 天空掩码生成脚本
 ├── data/                 # 输入图像目录
 ├── outputs/              # 输出掩码目录
 ├── models/               # 模型权重目录
