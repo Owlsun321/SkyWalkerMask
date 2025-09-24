@@ -1,0 +1,10 @@
+opencv-python==4.11.0.86
+Pillow==11.0.0
+numpy==1.26.4
+supervision==0.26.1
+segment-anything==1.0
+transformers==4.30.0
+tqdm==4.65.2
+onnx==1.19.0
+onnxruntime==1.19.2
+onnxruntime-gpu==1.19.2
