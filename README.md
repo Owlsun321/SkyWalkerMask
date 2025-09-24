@@ -26,19 +26,38 @@ pip install torch==2.1.0 torchvision==0.16.0 torchaudio==2.1.0 --index-url https
 # CPU版本
 pip install torch==2.1.0+cpu torchvision==0.16.0+cpu --index-url https://download.pytorch.org/whl/cpu
 
-### 3. 安装GroundingDINO
+### 3. 下载模型文件
+由于模型文件较大，需要单独下载：
+
+```bash
+# 创建模型目录
+mkdir -p models
+
+# 下载 GroundingDINO 模型 (约1.2GB)
+wget https://github.com/IDEA-Research/GroundingDINO/releases/download/v0.1.0-alpha/groundingdino_swint_ogc.pth -O models/groundingdino_swint_ogc.pth
+
+# 下载 SAM 模型 (约2.4GB)
+wget https://dl.fbaipublicfiles.com/segment_anything/sam_vit_h_4b8939.pth -O models/sam_vit_h_4b8939.pth
+
+# 下载天空移除模型 (约50MB)
+# 注意：这个模型需要从原始项目获取，或使用其他天空移除模型
+```
+
+**或者手动下载：**
+- [GroundingDINO 模型](https://github.com/IDEA-Research/GroundingDINO/releases/download/v0.1.0-alpha/groundingdino_swint_ogc.pth)
+- [SAM 模型](https://dl.fbaipublicfiles.com/segment_anything/sam_vit_h_4b8939.pth)
+- 天空移除模型需要从相关项目获取
+
+### 4. 安装GroundingDINO
 cd SkyWalkerMask
 cd GroundingDINO
 pip install -e .
 cd ..
 
-### 4. 安装其他依赖
+### 5. 安装其他依赖
 pip install -r requirements.txt
 
-### 5. 下载模型文件
-mkdir models
-
-### 模型下载
+## 使用方法
 #### Windows (命令提示符)
 ```cmd
 curl -L -o models/groundingdino_swint_ogc.pth https://github.com/IDEA-Research/GroundingDINO/releases/download/v0.1.0-alpha/groundingdino_swint_ogc.pth
