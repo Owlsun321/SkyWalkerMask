@@ -79,6 +79,7 @@ rm models/model.zip
 
 将要处理的图像文件放入 `data` 目录：
 
+```
 SkyWalkerMask/
 ├── data/           # 输入图像目录
 │   ├── image1.jpg
@@ -87,23 +88,28 @@ SkyWalkerMask/
 ├── outputs/        # 输出掩码目录 (自动创建)
 ├── human_mask.py   # 人物掩码生成脚本
 └── sky_mask.py     # 天空掩码生成脚本
+```
 
 ### 2. 运行脚本
+```bash
 conda activate skywalker
 python human_mask.py
 python sky_mask.py
 python skyremoval.py
+```
 
 ### 3. 查看结果
 处理完成后，黑白掩码文件将保存在 `outputs` 目录中：
 
 
 ## 项目结构
+```
 SkyWalkerMask/
 ├── README.md              # 说明文档
 ├── requirements.txt       # 依赖列表
 ├── human_mask.py         # 人物掩码生成脚本
 ├── sky_mask.py           # 天空掩码生成脚本
+├── skyremoval.py         # 天空移除脚本
 ├── data/                 # 输入图像目录
 ├── outputs/              # 输出掩码目录
 ├── models/               # 模型权重目录
@@ -114,6 +120,7 @@ SkyWalkerMask/
     ├── groundingdino/    # 核心代码
     ├── setup.py          # 安装脚本
     └── requirements.txt  # GroundingDINO依赖
+```
 
 ## 参数说明
 脚本会自动处理 `data` 目录中的所有图像文件，生成对应的黑白掩码。
