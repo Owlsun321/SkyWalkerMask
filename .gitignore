@@ -115,22 +115,23 @@ dmypy.json
 ehthumbs.db
 Thumbs.db
 
-# Model files (too large for git)
-models/*.pth
-models/*.onnx
-models/*.bin
-models/*.safetensors
+# Model files (too large for git) - but allow empty models directory
+# models/*.pth
+# models/*.onnx
+# models/*.bin
+# models/*.safetensors
 
 # Output files
 outputs/
-*.jpg
-*.jpeg
-*.png
-*.bmp
-*.tiff
-*.gif
+# Allow test images in data folder
+# *.jpg
+# *.jpeg
+# *.png
+# *.bmp
+# *.tiff
+# *.gif
 
-# Data files (optional - uncomment if you don't want to include test images)
+# Data files - allow test images
 # data/
 
 # Temporary files
