@@ -2,7 +2,7 @@
 基于GroundingDINO和Segment Anything Model (SAM)的天空移除和人物掩码生成工具。
 
 ![演示结果](demo_results.jpg)
-*上图展示了SkyWalkerMask的处理效果：第一行为原始图像，第二行为天空掩码，第三行为人物掩码*
+*上图展示了SkyWalkerMask的处理效果：第一、第三行为原始图像，第二行为天空掩码，第四行为人物掩码*
 
 ## 功能特性
 - ☁️ **天空移除**: 智能检测并移除图像中的天空区域
@@ -31,7 +31,7 @@ pip install torch==2.1.0+cpu torchvision==0.16.0+cpu --index-url https://downloa
 
 ### 3. 安装GroundingDINO
 cd SkyWalkerMask
-cd GroundingDINO
+cd groundingdino
 pip install -e .
 cd ..
 
