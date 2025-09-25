@@ -1,2 +1,2 @@
-# This file ensures the models directory is tracked by git
-# Users can place their model files here
+# This file keeps the models directory in git
+# Model files are ignored but the directory structure is preserved

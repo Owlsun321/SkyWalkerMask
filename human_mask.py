@@ -81,83 +81,42 @@ class HumanMaskGenerator:
         return image_pil, None
     
     def _detect_humans(self, image_pil, image):
-        """检测人物 - 使用更准确的方法"""
-        # 使用更全面的人物检测提示词
-        text_prompts = [
-            "person",
-            "people", 
-            "human",
-            "man",
-            "woman",
-            "person walking",
-            "person standing",
-            "person sitting",
-            "person running",
-            "person in the image",
-            "human figure",
-            "individual"
-        ]
-        
-        all_detections = []
-        
+        """检测人物 - 使用与demo相同的方法"""
         # 将PIL图像转换为OpenCV格式用于supervision
         image_cv = cv2.cvtColor(np.array(image_pil), cv2.COLOR_RGB2BGR)
         
-        for text_prompt in text_prompts:
-            try:
-                # 使用supervision的Model类进行检测
-                detections = self.grounding_dino_model.predict_with_classes(
-                    image=image_cv,
-                    classes=[text_prompt],
-                    box_threshold=0.25,  # 降低阈值以提高召回率
-                    text_threshold=0.25
-                )
-                
-                if len(detections) > 0:
-                    all_detections.append(detections)
-                    
-            except Exception as e:
-                print(f"检测提示词 '{text_prompt}' 时出错: {e}")
-                continue
+        # 使用与demo相同的简单检测方法
+        detections = self.grounding_dino_model.predict_with_classes(
+            image=image_cv,
+            classes=["person"],  # 只使用person，与demo保持一致
+            box_threshold=0.25,
+            text_threshold=0.25
+        )
         
-        # 合并所有检测结果
-        if all_detections:
-            # 合并所有检测框
-            combined_xyxy = np.vstack([det.xyxy for det in all_detections])
-            combined_confidence = np.hstack([det.confidence for det in all_detections])
-            combined_class_id = np.hstack([det.class_id for det in all_detections])
+        if len(detections) > 0:
+            # 应用NMS去重 - 使用与demo相同的阈值
+            nms_idx = torchvision.ops.nms(
+                torch.from_numpy(detections.xyxy), 
+                torch.from_numpy(detections.confidence), 
+                0.8  # 使用与demo相同的NMS阈值
+            ).numpy().tolist()
             
-            # 创建合并的检测结果
-            combined_detections = sv.Detections(
-                xyxy=combined_xyxy,
-                confidence=combined_confidence,
-                class_id=combined_class_id
-            )
-            
-            # 应用NMS去重
-            if len(combined_detections) > 0:
-                nms_idx = torchvision.ops.nms(
-                    torch.from_numpy(combined_detections.xyxy), 
-                    torch.from_numpy(combined_detections.confidence), 
-                    0.5  # NMS阈值
-                ).numpy().tolist()
-                
-                # 过滤检测结果
-                combined_detections.xyxy = combined_detections.xyxy[nms_idx]
-                combined_detections.confidence = combined_detections.confidence[nms_idx]
-                combined_detections.class_id = combined_detections.class_id[nms_idx]
+            # 过滤检测结果
+            detections.xyxy = detections.xyxy[nms_idx]
+            detections.confidence = detections.confidence[nms_idx]
+            detections.class_id = detections.class_id[nms_idx]
             
             # 转换为torch格式
-            if len(combined_detections) > 0:
+            if len(detections) > 0:
                 H, W = image_pil.size[1], image_pil.size[0]
-                boxes_torch = torch.from_numpy(combined_detections.xyxy) / torch.tensor([W, H, W, H])
-                phrases = [f"person_{i}" for i in range(len(combined_detections))]
+                boxes_torch = torch.from_numpy(detections.xyxy) / torch.tensor([W, H, W, H])
+                phrases = [f"person_{i}" for i in range(len(detections))]
                 return boxes_torch, phrases
         
         return None, None
     
     def _generate_masks(self, image_pil, boxes_filt):
-        """生成掩码"""
+        """生成掩码 - 使用与demo相同的方法"""
         if boxes_filt is None or len(boxes_filt) == 0:
             return None
         
@@ -170,30 +129,31 @@ class HumanMaskGenerator:
         
         masks_list = []
         for box in boxes_xyxy:
-            # 使用框作为提示生成掩码
+            # 使用与demo相同的SAM预测方法
             masks, scores, logits = self.sam_predictor.predict(
                 point_coords=None,
                 point_labels=None,
                 box=box.cpu().numpy(),
-                multimask_output=False,
+                multimask_output=True,  # 使用与demo相同的multimask_output=True
             )
+            # 选择最佳掩码
             best_mask = masks[np.argmax(scores)]
             masks_list.append(best_mask)
         
         return masks_list
     
     def _save_binary_mask(self, masks_list, output_path):
-        """保存黑白掩码"""
+        """保存黑白掩码 - 人物为黑色，背景为白色（颠倒）"""
         if masks_list is None or len(masks_list) == 0:
             # 如果没有检测到人物，创建全黑掩码
             # 需要获取原图尺寸
             return False
         
-        # 合并所有掩码
-        combined_mask = np.zeros_like(masks_list[0], dtype=np.uint8)
+        # 合并所有掩码 - 颠倒黑白：人物为黑色，背景为白色
+        combined_mask = np.ones_like(masks_list[0], dtype=np.uint8) * 255  # 先设为全白
         for mask in masks_list:
             binary_mask = (mask > 0.5).astype(np.uint8)
-            combined_mask[binary_mask > 0] = 255
+            combined_mask[binary_mask > 0] = 0  # 人物区域设为黑色
         
         # 保存为JPG格式
         cv2.imwrite(output_path, combined_mask)
@@ -209,10 +169,10 @@ class HumanMaskGenerator:
             boxes_filt, pred_phrases = self._detect_humans(image_pil, image)
             
             if boxes_filt is None:
-                # 没有检测到人物，创建全黑掩码
+                # 没有检测到人物，创建全白掩码（颠倒后）
                 H, W = image_pil.size[1], image_pil.size[0]
-                black_mask = np.zeros((H, W), dtype=np.uint8)
-                cv2.imwrite(output_path, black_mask)
+                white_mask = np.ones((H, W), dtype=np.uint8) * 255
+                cv2.imwrite(output_path, white_mask)
                 return False, "未检测到人物"
             
             # 生成掩码
@@ -281,18 +241,26 @@ class HumanMaskGenerator:
 
 def main():
     """主函数"""
+    parser = argparse.ArgumentParser(description='Human Mask Generator - 人物掩码生成工具')
+    parser.add_argument('input_dir', nargs='?', default='data', 
+                       help='输入图像目录路径 (默认: data)')
+    parser.add_argument('output_dir', nargs='?', default='outputs', 
+                       help='输出掩码目录路径 (默认: outputs)')
+    
+    args = parser.parse_args()
+    
     print("=" * 50)
     print("人物掩码生成器")
     print("=" * 50)
     
-    # 设置路径 - 使用相对路径
-    script_dir = os.path.dirname(os.path.abspath(__file__))
-    input_dir = os.path.join(script_dir, "data")
-    output_dir = os.path.join(script_dir, "outputs")
+    # 获取输入和输出目录
+    input_dir = args.input_dir
+    output_dir = args.output_dir
     
     # 检查输入目录
     if not os.path.exists(input_dir):
         print(f"错误: 输入目录不存在: {input_dir}")
+        print("请确保输入目录存在并包含图像文件")
         return
     
     print(f"输入目录: {input_dir}")

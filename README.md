@@ -1,6 +1,9 @@
 # SkyWalkerMask
 基于GroundingDINO和Segment Anything Model (SAM)的天空移除和人物掩码生成工具。
 
+![演示结果](demo_results.jpg)
+*上图展示了SkyWalkerMask的处理效果：第一行为原始图像，第二行为天空掩码，第三行为人物掩码*
+
 ## 功能特性
 - ☁️ **天空移除**: 智能检测并移除图像中的天空区域
 - 🎯 **自动人物检测**: 使用GroundingDINO检测图像中的人物
@@ -39,15 +42,6 @@ pip install -r requirements.txt
 mkdir models
 
 ### 模型下载
-#### Windows (命令提示符)
-```cmd
-curl -L -o models/groundingdino_swint_ogc.pth https://github.com/IDEA-Research/GroundingDINO/releases/download/v0.1.0-alpha/groundingdino_swint_ogc.pth
-curl -L -o models/sam_vit_h_4b8939.pth https://dl.fbaipublicfiles.com/segment_anything/sam_vit_h_4b8939.pth
-curl -L -o models/model.zip https://github.com/OpenDroneMap/SkyRemoval/releases/download/v1.0.6/model.zip
-powershell -command "Expand-Archive -Path 'models/model.zip' -DestinationPath 'models' -Force"
-del models\model.zip
-```
-
 #### Windows (PowerShell)
 ```powershell
 Invoke-WebRequest -Uri "https://github.com/IDEA-Research/GroundingDINO/releases/download/v0.1.0-alpha/groundingdino_swint_ogc.pth" -OutFile "models/groundingdino_swint_ogc.pth"
@@ -55,6 +49,14 @@ Invoke-WebRequest -Uri "https://dl.fbaipublicfiles.com/segment_anything/sam_vit_
 Invoke-WebRequest -Uri "https://github.com/OpenDroneMap/SkyRemoval/releases/download/v1.0.6/model.zip" -OutFile "models/model.zip"
 Expand-Archive -Path "models/model.zip" -DestinationPath "models" -Force
 Remove-Item "models/model.zip"
+```
+#### Windows (命令提示符)
+```cmd
+curl -L -o models/groundingdino_swint_ogc.pth https://github.com/IDEA-Research/GroundingDINO/releases/download/v0.1.0-alpha/groundingdino_swint_ogc.pth
+curl -L -o models/sam_vit_h_4b8939.pth https://dl.fbaipublicfiles.com/segment_anything/sam_vit_h_4b8939.pth
+curl -L -o models/model.zip https://github.com/OpenDroneMap/SkyRemoval/releases/download/v1.0.6/model.zip
+powershell -command "Expand-Archive -Path 'models/model.zip' -DestinationPath 'models' -Force"
+del models\model.zip
 ```
 
 #### Linux/macOS
@@ -87,19 +89,56 @@ SkyWalkerMask/
 │   └── ...
 ├── outputs/        # 输出掩码目录 (自动创建)
 ├── human_mask.py   # 人物掩码生成脚本
-└── sky_mask.py     # 天空掩码生成脚本
+└── skyremoval.py   # 天空移除脚本
 ```
 
 ### 2. 运行脚本
+
+#### 基本用法（使用默认目录）
 ```bash
 conda activate skywalker
 python human_mask.py
-python sky_mask.py
 python skyremoval.py
 ```
 
+#### 指定输入和输出目录
+```bash
+# 人物掩码生成
+python human_mask.py /path/to/input/images /path/to/output/masks
+
+# 天空移除
+python skyremoval.py /path/to/input/images /path/to/output/masks
+```
+
+#### 实际使用示例
+```bash
+# 处理Gaussian Splatting数据集
+python human_mask.py ./data/images ./data/masks
+python skyremoval.py ./data/images ./data/sky_masks
+
+# 处理自定义路径
+python human_mask.py "C:\MyProject\images" "C:\MyProject\human_masks"
+python skyremoval.py "C:\MyProject\images" "C:\MyProject\sky_masks"
+```
+
+**参数说明：**
+- 第一个参数：输入图像目录路径（必需）
+- 第二个参数：输出掩码目录路径（必需，如果不存在会自动创建）
+- 如果不提供参数，默认使用 `data` 作为输入目录，`outputs` 作为输出目录
+
+**支持的图像格式：**
+- JPG/JPEG
+- PNG
+- BMP
+- TIFF/TIF
+
+**输出格式：**
+- 所有掩码都保存为JPG格式
+- 人物掩码：黑色区域表示人物，白色区域表示背景
+- 天空掩码：黑色区域表示天空，白色区域表示非天空区域
+
 ### 3. 查看结果
-处理完成后，黑白掩码文件将保存在 `outputs` 目录中：
+处理完成后，黑白掩码文件将保存在指定的输出目录中：
 
 
 ## 项目结构
@@ -108,18 +147,19 @@ SkyWalkerMask/
 ├── README.md              # 说明文档
 ├── requirements.txt       # 依赖列表
 ├── human_mask.py         # 人物掩码生成脚本
-├── sky_mask.py           # 天空掩码生成脚本
 ├── skyremoval.py         # 天空移除脚本
+├── demo_results.jpg      # 演示结果图片
 ├── data/                 # 输入图像目录
 ├── outputs/              # 输出掩码目录
 ├── models/               # 模型权重目录
 │   ├── groundingdino_swint_ogc.pth  # GroundingDINO权重
 │   ├── sam_vit_h_4b8939.pth         # SAM权重
 │   └── model.onnx                   # 天空移除模型
-└── GroundingDINO/        # GroundingDINO源码目录
+└── groundingdino/        # GroundingDINO源码目录
     ├── groundingdino/    # 核心代码
     ├── setup.py          # 安装脚本
-    └── requirements.txt  # GroundingDINO依赖
+    ├── requirements.txt  # GroundingDINO依赖
+    └── pyproject.toml    # 项目配置
 ```
 
 ## 参数说明

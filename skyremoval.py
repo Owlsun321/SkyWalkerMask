@@ -209,11 +209,11 @@ class SkyFilter():
 
 # 命令行参数解析
 parser = argparse.ArgumentParser(description='SkyRemoval - 天空移除工具')
+parser.add_argument('input_dir', type=str, nargs='?', default='data', help='输入图像目录路径 (默认: data)')
+parser.add_argument('output_dir', type=str, nargs='?', default='outputs', help='输出掩码目录路径 (默认: outputs)')
 parser.add_argument('--model', type=str, help='模型文件路径 (默认: models/model.onnx)')
 parser.add_argument('--width', type=int, default=384, help='训练模型输入宽度')
 parser.add_argument('--height', type=int, default=384, help='训练模型输入高度')
-parser.add_argument('source', type=str, nargs='?', default='data', help='源图像路径，可以是单张图像或文件夹 (默认: data)')
-parser.add_argument('dest', type=str, nargs='?', default='outputs', help='目标文件夹路径 (默认: outputs)')
 
 if __name__ == '__main__':
     print('\n *** SkyRemoval - %s ***\n' % VERSION)
@@ -221,4 +221,4 @@ if __name__ == '__main__':
     args = parser.parse_args()
 
     filter = SkyFilter(args.model, args.width, args.height)
-    filter.run(args.source, args.dest)
+    filter.run(args.input_dir, args.output_dir)

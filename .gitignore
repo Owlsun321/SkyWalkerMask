@@ -116,10 +116,11 @@ ehthumbs.db
 Thumbs.db
 
 # Model files (too large for git) - but allow empty models directory
-# models/*.pth
-# models/*.onnx
-# models/*.bin
-# models/*.safetensors
+models/*.pth
+models/*.onnx
+models/*.bin
+models/*.safetensors
+models/*.zip
 
 # Output files
 outputs/
